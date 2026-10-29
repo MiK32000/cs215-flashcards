@@ -1,0 +1,257 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>AI Terms Flashcards</title>
+<style>
+:root{--bg:#f6f5f1;--card:#fff;--text:#1f1f1c;--muted:#6b6a64;--line:#d9d7cf;--accent:#3c3489;--accent-bg:#eeedfe;--good:#27500a;--good-bg:#eaf3de;--bad:#791f1f;--bad-bg:#fceBEB;--warn:#633806;--warn-bg:#faeeda}
+@media (prefers-color-scheme:dark){:root{--bg:#1b1b19;--card:#262624;--text:#ecebe5;--muted:#a3a198;--line:#3d3d3a;--accent:#cecbf6;--accent-bg:#26215c;--good:#c0dd97;--good-bg:#173404;--bad:#f7c1c1;--bad-bg:#501313;--warn:#fac775;--warn-bg:#412402}}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--text);font:16px/1.6 system-ui,-apple-system,"Segoe UI",sans-serif}
+main{max-width:760px;margin:0 auto;padding:24px 16px 64px}
+h1{font-size:26px;font-weight:600;margin:0 0 4px}
+h2{font-size:18px;font-weight:600;margin:28px 0 8px}
+p{margin:0 0 12px}
+.muted{color:var(--muted);font-size:14px}
+.panel{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:20px}
+button{font:inherit;cursor:pointer;border-radius:8px;border:1px solid var(--line);background:var(--card);color:var(--text);padding:10px 18px}
+button:hover{border-color:var(--muted)}
+button.primary{background:var(--accent);color:var(--bg);border-color:var(--accent);font-weight:600}
+button.good{background:var(--good-bg);color:var(--good);border-color:var(--good)}
+button.bad{background:var(--bad-bg);color:var(--bad);border-color:var(--bad)}
+button:disabled{opacity:.45;cursor:default}
+.rules{margin:0;padding-left:20px}.rules li{margin:4px 0}
+.hide{display:none!important}
+.bar{display:flex;gap:12px;align-items:center;justify-content:space-between;margin-bottom:12px;flex-wrap:wrap}
+.clock{font-variant-numeric:tabular-nums;font-size:30px;font-weight:600}
+.meta{font-size:14px;color:var(--muted)}
+.track{height:8px;background:var(--line);border-radius:4px;overflow:hidden;margin-bottom:16px}
+.fill{height:100%;background:var(--accent);width:100%;transition:width .2s linear}
+.fill.low{background:#d85a30}
+.card{min-height:260px;display:flex;flex-direction:column;justify-content:center;text-align:center;gap:14px}
+.tag{align-self:center;font-size:12px;letter-spacing:.04em;text-transform:uppercase;background:var(--accent-bg);color:var(--accent);border-radius:20px;padding:2px 12px}
+.big{font-size:28px;font-weight:600;line-height:1.3}
+.def{font-size:19px;line-height:1.55}
+.answer{border-top:1px dashed var(--line);padding-top:14px}
+.actions{display:flex;gap:10px;justify-content:center;flex-wrap:wrap;margin-top:16px}
+.verdict{font-size:14px;font-weight:600}
+table{width:100%;border-collapse:collapse;font-size:14px}
+th,td{text-align:left;padding:8px 6px;border-bottom:1px solid var(--line);vertical-align:top}
+.stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(120px,1fr));gap:10px;margin:12px 0}
+.stat{background:var(--accent-bg);border-radius:8px;padding:10px 12px}
+.stat b{display:block;font-size:24px}
+details{margin-top:10px}summary{cursor:pointer;font-weight:600}
+.src a{color:var(--accent)}
+.src li{margin:2px 0;font-size:14px}
+.note{background:var(--warn-bg);color:var(--warn);border-radius:8px;padding:10px 12px;font-size:14px;margin:12px 0}
+.weak{background:var(--bad-bg);border-radius:8px;padding:10px 12px;margin:8px 0}
+.weak b{color:var(--bad)}
+</style>
+</head>
+<body>
+<main>
+<h1>AI Terms Flashcards</h1>
+<p class="muted">12 cards, one 25:00 session, 2:00 max per card.</p>
+
+<section id="intro">
+  <div class="panel">
+    <h2 style="margin-top:0">How the session works</h2>
+    <ul class="rules">
+      <li>Your session clock starts at 25:00 and ends the instant it reaches 0:00. A card on screen at that moment is discarded.</li>
+      <li>Each card shows either the term or the definition, chosen at random. Every term is shown both ways over the session.</li>
+      <li>Recall the hidden side, press <b>Reveal</b>, then grade yourself: <b>Knew it</b> or <b>Missed it</b>.</li>
+      <li>Each card has 2:00. If it runs out, the answer is revealed and the card counts as Missed.</li>
+      <li>Pass 1 is all 12 cards in random order. Each later pass reshuffles all 12, and any card you Missed in the previous pass appears twice. The last card of one pass never opens the next.</li>
+      <li>Keys: <b>Space</b> reveal / next, <b>1</b> or <b>K</b> knew it, <b>2</b> or <b>M</b> missed it.</li>
+    </ul>
+    <div class="actions" style="justify-content:flex-start"><button class="primary" id="start">Start 25:00 session</button></div>
+  </div>
+
+  <h2>Deck and sources</h2>
+  <div class="note">Definitions were cross-checked against up to 4 web sources each. No CS 215 course material was available to me, so course-first priority was not applied. Review the definitions here before you start: they will be hidden during the session. Terms marked with a dagger have fewer than 4 supporting sources.</div>
+  <div id="deck"></div>
+</section>
+
+<section id="run" class="hide">
+  <div class="bar">
+    <div><div class="meta">Session time left</div><div class="clock" id="sclock">25:00</div></div>
+    <div class="meta" style="text-align:right"><div id="passinfo"></div><div id="cardinfo"></div></div>
+    <div style="text-align:right"><div class="meta">Card time left</div><div class="clock" id="cclock">2:00</div></div>
+  </div>
+  <div class="track"><div class="fill" id="cfill"></div></div>
+  <div class="panel card">
+    <span class="tag" id="tag"></span>
+    <div id="shown"></div>
+    <div class="answer hide" id="answer">
+      <div class="verdict hide" id="timeout" style="color:var(--bad)">Time ran out: marked Missed</div>
+      <div id="hidden"></div>
+    </div>
+  </div>
+  <div class="actions">
+    <button class="primary" id="reveal">Reveal</button>
+    <button class="good hide" id="knew">Knew it</button>
+    <button class="bad hide" id="missed">Missed it</button>
+    <button class="primary hide" id="next">Next card</button>
+  </div>
+  <div class="actions" style="margin-top:32px"><button id="endnow">End session and see score</button></div>
+</section>
+
+<section id="done" class="hide">
+  <div class="panel">
+    <h2 style="margin-top:0" id="donetitle">Time's up</h2>
+    <div class="stats" id="stats"></div>
+    <h2>Weak terms</h2>
+    <div id="weak"></div>
+    <h2>All terms</h2>
+    <table><thead><tr><th>Term</th><th>Knew</th><th>Missed</th></tr></thead><tbody id="tbody"></tbody></table>
+    <div class="actions" style="justify-content:flex-start"><button class="primary" id="again">Start another session</button></div>
+  </div>
+</section>
+</main>
+
+<script>
+const SESSION_MS = 25*60*1000, CARD_MS = 2*60*1000;
+const DECK = [
+{t:"Token",d:"The basic unit of text a language model reads and writes: a word, part of a word, or a punctuation mark. In English one token is roughly three-quarters of a word, and different models split text differently.",s:[["Brave API glossary","https://brave.com/search/api/glossary/context-window/"],["PromptLayer glossary","https://promptlayer.com/glossary/context-window"],["Hall glossary","https://usehall.com/glossary/context-window"],["Respan glossary","https://respan.ai/glossary/context-window"]]},
+{t:"Context Window",d:"The maximum number of tokens a model can consider at once, covering the instructions, conversation history, any documents, and the response it is generating. Anything beyond the limit is cut off or forgotten.",s:[["Brave API glossary","https://brave.com/search/api/glossary/context-window/"],["PromptLayer glossary","https://promptlayer.com/glossary/context-window"],["Hall glossary","https://usehall.com/glossary/context-window"],["Respan glossary","https://respan.ai/glossary/context-window"]]},
+{t:"Hallucination",d:"When an AI model produces output that sounds confident and plausible but is false, made up, or unsupported by its sources. It happens because models predict likely text rather than verify facts.",s:[["Singulr AI glossary","https://singulr.ai/glossary/hallucinations"],["Chalktalk AI glossary","https://chalktalkai.substack.com/p/glossary-ai-hallucination"],["LLM Reference","https://www.llmreference.com/concept/hallucination"],["Statista glossary","https://statista.com/statistics-glossary/definition/0801/hallucination"]]},
+{t:"Prompt",d:"The input given to a language model, such as a question, statement, or command plus any context, that guides the response it generates. Its wording and structure strongly affect the result.",s:[["UK Gov Digital and Data Hub","https://governmentdigitalanddatahub.campaign.gov.uk/learn/artificial-intelligence/artificial-intelligence-working-with-large-language-models/"],["Tutorials Dojo","https://tutorialsdojo.com/mastering-prompt-engineering-for-aws-large-language-models-llms/"],["Techielass","https://www.techielass.com/what-is-a-large-language-model-llm/"]],few:true},
+{t:"Fine-Tuning",d:"Continuing to train an already pre-trained model on a smaller, task-specific dataset so it adapts to a particular use case, instead of building a new model from scratch.",s:[["IBM","https://ibm.com/think/topics/fine-tuning"],["TechTarget","https://www.techtarget.com/ai/definition/What-is-fine-tuning-in-machine-learning-and-AI"],["Saturn Cloud","https://saturncloud.io/glossary/fine-tuning-in-machine-learning-and-deep-learning/"],["HPE","https://www.hpe.com/au/en/what-is/fine-tuning.html"]]},
+{t:"Retrieval-Augmented Generation (RAG)",d:"A technique that retrieves relevant information from external sources and adds it to the prompt before the model answers, so responses use current, domain-specific data and are less prone to hallucination.",s:[["Microsoft Learn","https://learn.microsoft.com/en-us/training/modules/retrieval-augmented-generation-azure-databricks/2-workflow"],["KNIME docs","https://docs.knime.com/ap/latest/ai/rag/what-is-rag"],["Quarkus LangChain4j docs","https://docs.quarkiverse.io/quarkus-langchain4j/dev/rag.html"],["Concepts (dsebastien)","https://concepts.dsebastien.net/concept/retrieval-augmented-generation/"]]},
+{t:"AI Agent",d:"Software that perceives its environment, makes decisions, and uses tools to take actions on its own toward a goal that a human sets.",s:[["AWS","https://aws.amazon.com/what-is/ai-agents"],["eWeek (citing IBM)","https://www.eweek.com/fr/news/ai-agents-cheat-sheet/"],["Microsoft Learn","https://learn.microsoft.com/en-us/training/modules/develop-ai-enabled-apps-using-github-copilot-sdk/2-what-ai-agent"],["New Horizons","https://www.newhorizons.com/resources/blog/what-is-an-ai-agent"]]},
+{t:"Embeddings",d:"Lists of numbers (vectors) that represent text or other data so that items with similar meaning sit close together, which lets search match by meaning rather than exact keywords.",s:[["Telnyx docs","https://developers.telnyx.com/docs/inference/embedding-rag"],["KNIME docs","https://docs.knime.com/ap/latest/ai/rag/what-is-rag"],["Quarkus LangChain4j docs","https://docs.quarkiverse.io/quarkus-langchain4j/dev/rag.html"]],few:true},
+{t:"Transformer",d:"A neural network architecture introduced in 2017 that uses self-attention to weigh all tokens in a sequence at once, allowing parallel training. It underlies most modern large language models.",s:[["Squarespace AI terminology","https://ai-blog.squarespace.com/terminology/transformer"],["Datature glossary","https://datature.io/glossary/multimodal-ai"]],few:true},
+{t:"Artificial General Intelligence (AGI)",d:"A hypothetical AI that could understand or learn any intellectual task a human can. It remains a research goal, and today's AI systems, which work within pre-set limits, are not AGI.",s:[["AWS","https://aws.amazon.com/what-is/artificial-general-intelligence"],["Google Cloud","https://cloud.google.com/discover/what-is-artificial-general-intelligence"],["ALMBOK (Wikipedia summary)","https://almbok.com/intelligence/agi_artificial_general_intelligence"]],few:true},
+{t:"Multimodal AI",d:"AI that processes and connects several kinds of data, such as text, images, audio, and video, within a single model, learning the relationships between them.",s:[["Datature glossary","https://datature.io/glossary/multimodal-ai"],["Bitdeer","https://www.bitdeer.ai/en/blog/what-is-multimodal-ai/"],["EMB Global","https://blog.emb.global/understanding-multimodal-ai-architecture-models-and-frameworks"]],few:true},
+{t:"Large Language Model (LLM)",d:"A neural network trained on very large amounts of text, often with billions of parameters, so it can understand and generate human-like language.",s:[["Techielass","https://www.techielass.com/what-is-a-large-language-model-llm/"],["Lenovo","https://www.lenovo.com/gb/en/knowledgebase/what-are-large-language-models/"],["UK Gov Digital and Data Hub","https://governmentdigitalanddatahub.campaign.gov.uk/learn/artificial-intelligence/artificial-intelligence-working-with-large-language-models/"]],few:true,added:true}
+];
+const $=id=>document.getElementById(id);
+const esc=s=>String(s).replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+const fmt=ms=>{const s=Math.max(0,Math.ceil(ms/1000));return Math.floor(s/60)+":"+String(s%60).padStart(2,"0")};
+const shuffle=a=>{for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]]}return a};
+
+$("deck").innerHTML=DECK.map((c,i)=>`<details><summary>${i+1}. ${esc(c.t)}${c.few?" †":""}${c.added?" (added by Claude)":""}</summary><p>${esc(c.d)}</p><ul class="src">${c.s.map(x=>`<li><a href="${x[1]}" target="_blank" rel="noopener">${esc(x[0])}</a></li>`).join("")}</ul></details>`).join("");
+
+let S;
+function newState(){
+  return {end:0,cardStart:0,queue:[],pass:0,prevLast:null,passMissed:new Set(),shown:DECK.map(()=>[0,0]),
+    cur:null,side:0,revealed:false,graded:false,knew:DECK.map(()=>0),missed:DECK.map(()=>0),total:0,timer:null,over:false};
+}
+function buildPass(){
+  const ids=DECK.map((_,i)=>i);
+  S.passMissed.forEach(i=>ids.push(i));
+  let best=null;
+  for(let n=0;n<500;n++){
+    const a=shuffle(ids.slice());
+    let ok=a[0]!==S.prevLast;
+    for(let i=1;i<a.length&&ok;i++) if(a[i]===a[i-1]) ok=false;
+    best=a;
+    if(ok) break;
+  }
+  S.pass++;
+  S.passMissed=new Set();
+  S.queue=best;
+  S.passSize=best.length;
+}
+function showCard(){
+  if(!S.queue.length) buildPass();
+  S.cur=S.queue.shift();
+  const c=S.shown[S.cur];
+  S.side = c[0]<c[1] ? 0 : c[1]<c[0] ? 1 : Math.floor(Math.random()*2);
+  c[S.side]++;
+  S.revealed=false;S.graded=false;S.cardStart=Date.now();
+  const card=DECK[S.cur];
+  $("tag").textContent = S.side===0 ? "Term: recall the definition" : "Definition: recall the term";
+  $("shown").innerHTML = S.side===0 ? `<div class="big">${esc(card.t)}</div>` : `<div class="def">${esc(card.d)}</div>`;
+  $("hidden").innerHTML = S.side===0 ? `<div class="def">${esc(card.d)}</div>` : `<div class="big">${esc(card.t)}</div>`;
+  $("answer").classList.add("hide");$("timeout").classList.add("hide");
+  $("reveal").classList.remove("hide");
+  ["knew","missed","next"].forEach(id=>$(id).classList.add("hide"));
+  $("passinfo").textContent="Pass "+S.pass+" · "+(S.passSize-S.queue.length)+" of "+S.passSize;
+  $("cardinfo").textContent="Cards graded: "+S.total;
+  tick();
+}
+function reveal(){
+  if(S.revealed||S.over) return;
+  S.revealed=true;
+  $("answer").classList.remove("hide");
+  $("reveal").classList.add("hide");
+  if(!S.graded){$("knew").classList.remove("hide");$("missed").classList.remove("hide")}
+}
+function grade(ok,timedOut){
+  if(S.graded||S.over) return;
+  S.graded=true;S.total++;
+  if(ok) S.knew[S.cur]++; else {S.missed[S.cur]++;S.passMissed.add(S.cur)}
+  S.prevLast=S.cur;
+  $("knew").classList.add("hide");$("missed").classList.add("hide");
+  $("next").classList.remove("hide");
+  $("cardinfo").textContent="Cards graded: "+S.total;
+  if(timedOut){$("timeout").classList.remove("hide")}
+}
+function cardTimeout(){
+  if(S.graded) return;
+  reveal();
+  $("knew").classList.add("hide");$("missed").classList.add("hide");$("reveal").classList.add("hide");
+  grade(false,true);
+}
+function tick(){
+  if(S.over) return;
+  const now=Date.now();
+  const sl=S.end-now;
+  if(sl<=0){finish();return}
+  $("sclock").textContent=fmt(sl);
+  let cl=CARD_MS-(now-S.cardStart);
+  if(S.graded) cl=Math.max(cl,0);
+  if(cl<=0&&!S.graded) cardTimeout();
+  const shownMs=S.graded?Math.max(0,cl):cl;
+  $("cclock").textContent=fmt(shownMs);
+  const pct=Math.max(0,Math.min(100,shownMs/CARD_MS*100));
+  $("cfill").style.width=pct+"%";
+  $("cfill").classList.toggle("low",shownMs<20000);
+}
+function start(){
+  S=newState();
+  S.end=Date.now()+SESSION_MS;
+  ["intro","done"].forEach(id=>$(id).classList.add("hide"));
+  $("run").classList.remove("hide");
+  showCard();
+  S.timer=setInterval(tick,200);
+}
+function finish(early){
+  S.over=true;clearInterval(S.timer);
+  $("donetitle").textContent = early===true ? "Session ended early" : "Time's up";
+  $("run").classList.add("hide");$("done").classList.remove("hide");
+  const k=S.knew.reduce((a,b)=>a+b,0),m=S.missed.reduce((a,b)=>a+b,0);
+  const passes=S.pass-(S.queue.length>0?1:0);
+  $("stats").innerHTML=[["Cards graded",S.total],["Knew it",k],["Missed it",m],["Accuracy",S.total?Math.round(k/S.total*100)+"%":"n/a"],["Passes done",Math.max(0,passes)]].map(x=>`<div class="stat"><b>${x[1]}</b>${x[0]}</div>`).join("");
+  const rows=DECK.map((c,i)=>({i,c,k:S.knew[i],m:S.missed[i]}));
+  const weak=rows.filter(r=>r.m>0).sort((a,b)=>b.m-a.m||a.k-b.k);
+  $("weak").innerHTML = weak.length ? weak.map(r=>`<div class="weak"><b>${esc(r.c.t)}</b> (missed ${r.m}, knew ${r.k})<br>${esc(r.c.d)}</div>`).join("") : "<p>No missed cards. Nice work.</p>";
+  rows.sort((a,b)=>b.m-a.m||a.c.t.localeCompare(b.c.t));
+  $("tbody").innerHTML=rows.map(r=>`<tr><td>${esc(r.c.t)}</td><td>${r.k}</td><td>${r.m}</td></tr>`).join("");
+}
+let endArm=null;
+$("endnow").onclick=()=>{
+  if(!S||S.over) return;
+  const b=$("endnow");
+  if(endArm){clearTimeout(endArm);endArm=null;b.textContent="End session and see score";finish(true);return}
+  b.textContent="Click again to confirm";
+  endArm=setTimeout(()=>{endArm=null;b.textContent="End session and see score"},3000);
+};
+$("start").onclick=start;
+$("again").onclick=start;
+$("reveal").onclick=reveal;
+$("knew").onclick=()=>grade(true);
+$("missed").onclick=()=>grade(false);
+$("next").onclick=()=>{if(!S.over)showCard()};
+document.addEventListener("keydown",e=>{
+  if(!S||S.over||$("run").classList.contains("hide")) return;
+  const k=e.key.toLowerCase();
+  if(e.key===" "){e.preventDefault();if(S.graded)showCard();else if(!S.revealed)reveal()}
+  else if((k==="1"||k==="k")&&S.revealed&&!S.graded)grade(true);
+  else if((k==="2"||k==="m")&&S.revealed&&!S.graded)grade(false);
+});
+</script>
+</body>
+</html>
